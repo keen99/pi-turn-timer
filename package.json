@@ -1,0 +1,12 @@
+{
+  "name": "pi-turn-timer",
+  "version": "0.1.0",
+  "description": "Shows elapsed turn time in the footer (live) and notifies duration on turn end.",
+  "type": "module",
+  "pi": {
+    "extensions": ["./index.ts"]
+  },
+  "keywords": ["pi", "pi-coding-agent", "extension", "timer"],
+  "license": "MIT",
+  "author": "keen99"
+}
