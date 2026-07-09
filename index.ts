@@ -1,6 +1,7 @@
 import type { ExtensionContext, ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
-const STATUS_KEY = "turn-timer";
+const STATUS_KEY = "za-turn-timer";
+const IDLE_KEY = "zb-idle-timer";
 
 let turnStart: number | undefined;
 let lastTurnEnd: number | undefined;
@@ -36,22 +37,31 @@ function tickIntervalMs(ms: number): number {
 }
 
 function scheduleNext(ms: number): void {
-  if (interval) clearTimeout(interval);
+  if (interval) {
+    clearTimeout(interval);
+    interval = undefined;
+  }
   interval = setTimeout(() => {
+    interval = undefined;
     tick();
-    const elapsed = turnStart ? Date.now() - turnStart : lastTurnEnd ? Date.now() - lastTurnEnd : 0;
-    if (elapsed > 0) scheduleNext(elapsed);
   }, ms);
+}
+
+function setIdle(text: string | undefined): void {
+  if (!latestCtx) return;
+  try {
+    latestCtx.ui.setStatus(IDLE_KEY, text);
+  } catch {
+    // stale context — ignore
+  }
 }
 
 function tick(): void {
   if (turnStart) {
-    // Active turn — show elapsed
     setStatus(`⏱ ${formatDuration(Date.now() - turnStart)}`);
     scheduleNext(tickIntervalMs(Date.now() - turnStart));
   } else if (lastTurnEnd) {
-    // Idle — show time since last turn ended
-    setStatus(`💤 ${formatDuration(Date.now() - lastTurnEnd)}`);
+    setIdle(`💤 ${formatDuration(Date.now() - lastTurnEnd)}`);
     scheduleNext(tickIntervalMs(Date.now() - lastTurnEnd));
   }
 }
@@ -61,6 +71,7 @@ export default function turnTimerExtension(pi: ExtensionAPI): void {
     latestCtx = ctx;
     // Clear any leftover status from a prior session.
     setStatus(undefined);
+    setIdle(undefined);
   });
 
   pi.on("before_agent_start", (_event, ctx) => {
@@ -84,7 +95,7 @@ export default function turnTimerExtension(pi: ExtensionAPI): void {
       const elapsed = Date.now() - turnStart;
       const formatted = formatDuration(elapsed);
       lastTurnEnd = Date.now();
-      // Keep final duration visible in footer, plus a toast.
+      // Keep final duration visible in footer (frozen), start idle timer.
       setStatus(`⏱ ${formatted}`);
       try {
         ctx?.ui?.notify(`Turn: ${formatted}`, "info");
@@ -92,12 +103,8 @@ export default function turnTimerExtension(pi: ExtensionAPI): void {
         // ignore notify failures
       }
       turnStart = undefined;
-      // Switch to idle timer after showing final turn duration briefly.
-      setTimeout(() => {
-        if (!turnStart && lastTurnEnd) {
-          tick();
-        }
-      }, 3000);
+      // Switch to idle timer immediately.
+      if (lastTurnEnd) tick();
     }
   });
 
@@ -107,6 +114,7 @@ export default function turnTimerExtension(pi: ExtensionAPI): void {
       interval = undefined;
     }
     setStatus(undefined);
+    setIdle(undefined);
     turnStart = undefined;
     lastTurnEnd = undefined;
   });
