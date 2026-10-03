@@ -3,10 +3,29 @@
   "version": "0.1.0",
   "description": "Shows elapsed turn time in the footer (live) and notifies duration on turn end.",
   "type": "module",
+  "main": "./index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "npx --yes tsx@4.20.6 --test test/*.test.ts",
+    "check": "npm run typecheck && npm test",
+    "test:matrix": "node test/release-matrix.mjs"
+  },
   "pi": {
     "extensions": ["./index.ts"]
   },
   "keywords": ["pi", "pi-coding-agent", "extension", "timer"],
   "license": "MIT",
-  "author": "keen99"
+  "author": "keen99",
+  "devDependencies": {
+    "@earendil-works/pi-coding-agent": "0.75.4",
+    "typescript": "5.9.3"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*"
+  },
+  "peerDependenciesMeta": {
+    "@earendil-works/pi-coding-agent": {
+      "optional": true
+    }
+  }
 }

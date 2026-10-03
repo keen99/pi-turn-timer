@@ -1,4 +1,7 @@
 import type { ExtensionContext, ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { getAgentDir } from "@earendil-works/pi-coding-agent";
+import { writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 const STATUS_KEY = "za-turn-timer";
 const IDLE_KEY = "zb-idle-timer";
@@ -72,6 +75,16 @@ export default function turnTimerExtension(pi: ExtensionAPI): void {
     // Clear any leftover status from a prior session.
     setStatus(undefined);
     setIdle(undefined);
+    // Deep-smoke marker (release matrix): proves session_start ran and the
+    // setStatus path works on the real session's ui object.
+    if (process.env.TURN_TIMER_DEBUG === "1") {
+      try {
+        writeFileSync(
+          join(getAgentDir(), "turn-timer-installed.json"),
+          JSON.stringify({ installed: true }, null, 2) + "\n",
+        );
+      } catch {}
+    }
   });
 
   pi.on("before_agent_start", (_event, ctx) => {
