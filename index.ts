@@ -118,6 +118,17 @@ export default function turnTimerExtension(pi: ExtensionAPI): void {
       turnStart = undefined;
       // Switch to idle timer immediately.
       if (lastTurnEnd) tick();
+      // Deep-smoke marker (release matrix): records what the agent_end path
+      // actually produced. Only written when a real turn ended with the
+      // timer active — the smoke asserts on frozen duration + notify text.
+      if (process.env.TURN_TIMER_DEBUG === "1") {
+        try {
+          writeFileSync(
+            join(getAgentDir(), "turn-timer-turnend.json"),
+            JSON.stringify({ handled: true, frozen: formatted, notify: `Turn: ${formatted}` }, null, 2) + "\n",
+          );
+        } catch {}
+      }
     }
   });
 
