@@ -1,5 +1,7 @@
 # pi-turn-timer
 
+[![pi releases tested](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/keen99/pi-turn-timer/main/latest-tested.json)](https://github.com/keen99/pi-turn-timer/actions/workflows/release-watch.yml)
+
 Pi extension that shows elapsed turn time live in the footer and notifies the
 duration when a turn ends.
 
