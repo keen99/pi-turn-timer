@@ -17,7 +17,7 @@ lines, so it composes with the forked/custom footer.
 ## Install
 
 ```bash
-# authenticated (ssh — private repos)
+# ssh
 pi install git:git@github.com:keen99/pi-turn-timer
 
 # public (https)
